@@ -1,0 +1,16 @@
+{
+  "name": "repro-near-funcall",
+  "version": "1.0.0",
+  "description": "Repro near function call actions with local near-vm-runner-standalone",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^7.2.0",
+    "near-api-js": "^0.39.0",
+    "node-fetch": "^2.6.1"
+  }
+}

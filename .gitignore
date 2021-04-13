@@ -1,0 +1,4 @@
+node_modules
+contract.wasm
+state.json
+vmcontext.json
