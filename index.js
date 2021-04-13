@@ -25,10 +25,13 @@ function txnStatusFullToVMContext(txStatusFull) {
   assert(action.length == 1);
   action = action[0];
   assert(action.FunctionCall);
+  let signer_account_pk = transaction.public_key.split(":");
+  assert(signer_account_pk[0] == "ed25519");
+  signer_account_pk = signer_account_pk[1];
   return {
     current_account_id: transaction.receiver_id,
     signer_account_id: transaction.signer_id,
-    signer_account_pk: transaction.public_key,
+    signer_account_pk,
     predecessor_account_id: receipt.predecessor_id,
     input: action.FunctionCall.args,
     attached_deposit: action.FunctionCall.deposit,
@@ -73,7 +76,10 @@ async function fetchTxnStatusFull({ transaction, account, rpcNodeUrl }) {
 function blockToVMContext(block) {
   return {
     block_index: block.header.height,
-    epoch_height: block.header.epoch_id,
+
+    // TODO: once https://github.com/near/nearcore/pull/4221 merged, we'll have epoch_height from `validators` rpc
+    // epoch_height: block.header.epoch_id,
+    epoch_height: 1,
     block_timestamp: block.header.timestamp_nanosec,
     random_seed: block.header.random_value,
   };
@@ -147,7 +153,7 @@ async function fetchContractCode({ rpcNodeUrl, contractAccount, blockHash }) {
     }),
   });
   const res = await req.json();
-  return new Buffer(res.result.code_base64, "base64");
+  return Buffer.from(res.result.code_base64, "base64");
 }
 
 async function main() {
