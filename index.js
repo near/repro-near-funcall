@@ -7,21 +7,22 @@ const fs = require("fs").promises;
 program
   .requiredOption("-a, --account <account>", "account id")
   .requiredOption("-t, --transaction <transaction>", "transaction hash")
+  .option("-r --receipt-id <receipt-id>", "receipt id (hash)")
   .option(
     "-u, --rpc-node-url <url>",
     "NEAR rpc node url",
     "https://rpc.testnet.near.org"
   );
 
-function txnStatusFullToVMContext(txStatusFull) {
-  const { transaction, receipts } = txStatusFull;
-  let receipt = receipts.filter(
-    (r) => r.receiver_id == transaction.receiver_id
-  );
+function txnStatusFullToVMContext({ txnStatusFull, receiptId }) {
+  const { transaction, receipts } = txnStatusFull;
+  let receipt = receiptId
+    ? receipts.filter((r) => r.receipt_id == receiptId)
+    : receipts.filter((r) => r.receiver_id == transaction.receiver_id);
 
   assert(receipt.length == 1);
   receipt = receipt[0];
-  let action = transaction.actions;
+  let action = receipt.receipt.Action.actions;
   assert(action.length == 1);
   action = action[0];
   assert(action.FunctionCall);
@@ -29,7 +30,7 @@ function txnStatusFullToVMContext(txStatusFull) {
   assert(signer_account_pk[0] == "ed25519");
   signer_account_pk = signer_account_pk[1];
   return {
-    current_account_id: transaction.receiver_id,
+    current_account_id: receipt.receiver_id,
     signer_account_id: transaction.signer_id,
     signer_account_pk,
     predecessor_account_id: receipt.predecessor_id,
@@ -160,9 +161,21 @@ async function main() {
   program.parse(process.argv);
   const options = program.opts();
   const txnStatusFull = await fetchTxnStatusFull(options);
-  const vmContext1 = txnStatusFullToVMContext(txnStatusFull);
+  const vmContext1 = txnStatusFullToVMContext({
+    txnStatusFull,
+    receiptId: options.receiptId,
+  });
+  let blockHash;
+  if (options.receiptId) {
+    let receipt = txnStatusFull.receipts_outcome.filter(
+      (r) => r.id == options.receiptId
+    );
+    blockHash = receipt[0].block_hash;
+  } else {
+    blockHash = txnStatusFull.transaction_outcome.block_hash;
+  }
   const block = await fetchBlock({
-    blockHash: txnStatusFull.transaction_outcome.block_hash,
+    blockHash,
     rpcNodeUrl: options.rpcNodeUrl,
   });
   const vmContext2 = blockToVMContext(block);
