@@ -172,6 +172,6 @@ near-vm-runner-standalone --context-file vmcontext.json --method-name set_status
 
 ## TODO
 
-- Check to ensure block hash is the correct one that "before" transaction and receipt execution, not after
-- Figure out pass promise results to cross contract calls. Right now it works without it, but if contract method tried to access this data = it will fail
-- Figure out how to tell if a function call is a view programmatically
+- [x] Check to ensure block hash is the correct one that "before" transaction and receipt execution, not after
+- [ ] Figure out pass promise results to cross contract calls. Right now it works without it, but if contract method tried to access this data = it will fail
+- [ ] Figure out how to tell if a function call is a view programmatically
