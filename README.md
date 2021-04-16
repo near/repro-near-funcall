@@ -170,8 +170,57 @@ And reproduce with
 near-vm-runner-standalone --context-file vmcontext.json --method-name set_status --wasm-file contract.wasm --state-file state.json --profile-gas --timings
 ```
 
+### Repro execution of a function call that has cross contract read or promise result as input
+
+Use the contract deployed in previous section, then call:
+
+```
+near call cross-contract.$REPRO_ACCOUNT get_from_other_contract_and_record --accountId $REPRO_ACCOUNT "{\"account_id\":\"$REPRO_ACCOUNT\"}"
+```
+
+There are three steps in this transaction:
+
+1. `$REPRO_ACCOUNT` calls `cross-contract.$REPRO_ACCOUNT`, `get_from_other_contract_and_record` method, which create two receipts (step 2 and 3) that does the actual cross contract call.
+2. `cross-contract.$REPRO_ACCOUNT` calls `simple-state.$REPRO_ACCOUNT`, `get_status` method. This is a cross contract read, returned result is used as parameter as step 3.
+3. `cross-contract.$REPRO_ACCOUNT` calls it's `get_from_other_callback` method, takes argument from step 2's return.
+
+Reproduce the first step (a cross contract read) of the transaction is same as before:
+
+```
+export TXN=
+node index.js -a $REPRO_ACCOUNT -t $TXN
+near-vm-runner-standalone --context-file vmcontext.json --method-name get_from_other_contract_and_record --wasm-file contract.wasm --state-file state.json --profile-gas --timings
+```
+
+Reproduce the second step is also similar to the previous section's second part, lookup the receipt id from explorer (Find the receipt include `get_status` function call) then run:
+
+```
+node index.js -a $REPRO_ACCOUNT -t $TXN -r <Your receipt id>
+near-vm-runner-standalone --context-file vmcontext.json --method-name get_status --wasm-file contract.wasm --state-file state.json --profile-gas --timings
+```
+
+Reproduce the third step need return data from step 2 (this is also same for any contract call that used as callback that takes return data from previous calls). To reproduce it first locate the receipt id from explorer (the one has content "Called method: 'get_from_other_callback'")
+
+```
+node index.js -a $REPRO_ACCOUNT -t $TXN -r <Your receipt id>
+```
+
+Obtain the return data from step 2's output (the "return_data" section)
+
+```
+{"outcome":{"balance":"169954889277699040312798592","storage_usage":346,"return_data":{"Value":"\u0001\u0003\u0000\u0000\u0000ooo"},"burnt_gas":201805752385,"used_gas":201805752385,"logs":["get_status for account_id repro.testnet"]},"err":null,"receipts":[],"state":{"U1RBVEU=":"AQAAAA0AAAByZXByby50ZXN0bmV0AwAAAG9vbw=="}}
+```
+
+Then run vm standalone with step 2's return data as promise_results:
+
+```
+./near-vm-runner-standalone --context-file vmcontext.json --method-name get_from_other_callback --wasm-file contract.wasm --state-file state.json --promise-results '{"Successful":"\u0001\u0003\u0000\u0000\u0000ooo"}'  --profile-gas --timings
+```
+
 ## TODO
 
 - [x] Check to ensure block hash is the correct one that "before" transaction and receipt execution, not after
-- [ ] Figure out pass promise results to cross contract calls. Right now it works without it, but if contract method tried to access this data = it will fail
-- [ ] Figure out how to tell if a function call is a view programmatically
+- [x] Figure out pass promise results to cross contract calls. Right now it works without it, but if contract method tried to access this data = it will fail
+- [x] Figure out how to tell if a function call is a view programmatically:
+  - view method is also executed as call, when execute as part of cross contract read
+- [ ] Add some contracts that relying on result of the vm context to see vmcontext is correctly obtained

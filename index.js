@@ -18,7 +18,11 @@ function txnStatusFullToVMContext({ txnStatusFull, receiptId }) {
   const { transaction, receipts } = txnStatusFull;
   let receipt = receiptId
     ? receipts.filter((r) => r.receipt_id == receiptId)
-    : receipts.filter((r) => r.receiver_id == transaction.receiver_id);
+    : receipts.filter(
+        (r) =>
+          r.receiver_id == transaction.receiver_id &&
+          r.predecessor_id == transaction.signer_id
+      );
 
   assert(receipt.length == 1);
   receipt = receipt[0];
@@ -38,7 +42,9 @@ function txnStatusFullToVMContext({ txnStatusFull, receiptId }) {
     attached_deposit: action.FunctionCall.deposit,
     prepaid_gas: action.FunctionCall.gas,
     is_view: false,
-    output_data_receivers: receipt.receipt.Action.output_data_receivers,
+    output_data_receivers: receipt.receipt.Action.output_data_receivers.map(
+      (r) => r.receiver_id
+    ),
   };
 }
 
