@@ -220,7 +220,7 @@ Then run vm standalone with step 2's return data as promise_results:
 ## TODO
 
 - [x] Check to ensure block hash is the correct one that "before" transaction and receipt execution, not after
-- [x] Figure out pass promise results to cross contract calls. Right now it works without it, but if contract method tried to access this data = it will fail
+- [x] Figure out pass promise results to cross contract calls
 - [x] Figure out how to tell if a function call is a view programmatically:
   - view method is also executed as call, when execute as part of cross contract read
-- [ ] Add some contracts that relying on result of the vm context to see vmcontext is correctly obtained
+- [x] Add reproduce example that has cross contract read
