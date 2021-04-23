@@ -32,31 +32,36 @@ async function fetchContractState({ blockId, contractAccount, rpcNodeUrl }) {
     }),
   });
   const res = await req.json();
-  let result = {};
-  let prefix = Buffer.concat([
-    Buffer.from([9]),
-    Buffer.from(contractAccount),
-    Buffer.from(","),
-  ]);
+  //   let result = {};
+  let stateRecords = [];
+  //   let prefix = Buffer.concat([
+  //     Buffer.from([9]),
+  //     Buffer.from(contractAccount),
+  //     Buffer.from(","),
+  //   ]);
   for (let kv of res.result.values) {
-    result[Buffer.concat([prefix, Buffer.from(kv.key)]).toString("base64")] =
-      kv.value;
+    // format of raw trie key
+    // result[Buffer.concat([prefix, Buffer.from(kv.key)]).toString("base64")] =
+    //   kv.value;
+    stateRecords.push({
+      Data: { account_id: contractAccount, data_key: kv.key, value: kv.value },
+    });
   }
-  return result;
+  return stateRecords;
 }
 
 async function main() {
   program.parse(process.argv);
   const options = program.opts();
   //   console.log(options);
-  let allState = {};
+  let allState = [];
   for (let contractAccount of options.accounts) {
     let contractState = await fetchContractState({
       contractAccount,
       blockId: options.blockId,
       rpcNodeUrl: options.rpcNodeUrl,
     });
-    Object.assign(allState, contractState);
+    allState = allState.concat(contractState);
   }
   console.log(JSON.stringify(allState, null, 2));
 }
