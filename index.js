@@ -136,6 +136,7 @@ async function fetchContractState({ rpcNodeUrl, contractAccount, blockHash }) {
     }),
   });
   const res = await req.json();
+  console.log(res.result.values);
   let state = {};
   for (let kv of res.result.values) {
     state[kv.key] = kv.value;
