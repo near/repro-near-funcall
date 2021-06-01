@@ -19,7 +19,7 @@ Let's trying with examples of contract in different senarios, where you can repr
 - Have `near-vm-runner-standalone` compiled after merge this two branches into master: `fix-vmcontext-ser`, `state-file-standalone`.
 - Register an account on https://wallet.testnet.near.org
 - Login with `near login`
-- Set environment var of your near account: `export REPRO_ACCOUNT=<your-account.testnet>
+- Set environment var of your near account: `export REPRO_ACCOUNT=<your-account.testnet>`
 
 ### Repro execution of a simple contract
 
