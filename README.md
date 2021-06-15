@@ -1,6 +1,9 @@
 # Tool to get enough information for reproduce NEAR contract execution locally
 
-## Usage
+## Usage for repro with near-sandbox
+WIP in https://github.com/near/docs/pull/724
+
+## Usage for repro with near-vm-standalone [DEPRECIATED]
 
 ```
 npm i
