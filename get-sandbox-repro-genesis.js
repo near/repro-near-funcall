@@ -30,8 +30,20 @@ async function loadAndBackupSandboxGenesis({ sandboxHome }) {
   return JSON.parse(genesis)
 }
 
+function blockParams(blockId) {
+  if (blockId) {
+    let block = Number(blockId)
+    if (isNaN(block)) {
+      return { block_id: blockId }
+    } else {
+      return { block_id: block }
+    }
+  }
+  return { finality: 'final' }
+}
+
 async function fetchContractState({ blockId, contractAccount, rpcNodeUrl }) {
-  let params = blockId ? { block_id: Number(blockId) } : { finality: 'final' }
+  let params = blockParams(blockId)
   const req = await fetch(rpcNodeUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -59,7 +71,7 @@ async function fetchContractState({ blockId, contractAccount, rpcNodeUrl }) {
 }
 
 async function fetchContractCode({ rpcNodeUrl, contractAccount, blockId }) {
-  let params = blockId ? { block_id: Number(blockId) } : { finality: 'final' }
+  let params = blockParams(blockId)
   const req = await fetch(rpcNodeUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -82,7 +94,7 @@ async function fetchContractCode({ rpcNodeUrl, contractAccount, blockId }) {
 }
 
 async function fetchBlock({ rpcNodeUrl, blockId }) {
-  let params = blockId ? { block_id: Number(blockId) } : { finality: 'final' }
+  let params = blockParams(blockId)
   const req = await fetch(rpcNodeUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -98,7 +110,7 @@ async function fetchBlock({ rpcNodeUrl, blockId }) {
 }
 
 async function fetchAccount({ blockId, rpcNodeUrl, account }) {
-  let params = blockId ? { block_id: Number(blockId) } : { finality: 'final' }
+  let params = blockParams(blockId)
   const req = await fetch(rpcNodeUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -132,7 +144,7 @@ function formatAccount(accountId, account) {
 }
 
 async function fetchAccessKey({ blockId, rpcNodeUrl, account }) {
-  let params = blockId ? { block_id: Number(blockId) } : { finality: 'final' }
+  let params = blockParams(blockId)
   const req = await fetch(rpcNodeUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -161,7 +173,7 @@ function formatAccessKey(account_id, key) {
 }
 
 async function fetchProtocolConfig({ blockId, rpcNodeUrl }) {
-  let params = blockId ? { block_id: Number(blockId) } : { finality: 'final' }
+  let params = blockParams(blockId)
   const req = await fetch(rpcNodeUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
