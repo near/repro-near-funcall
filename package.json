@@ -12,6 +12,6 @@
     "bn.js": "^5.2.0",
     "commander": "^7.2.0",
     "near-api-js": "^0.39.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.7.0"
   }
 }
